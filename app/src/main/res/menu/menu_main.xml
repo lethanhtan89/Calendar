@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/main_action_list"
+        android:orderInCategory="100"
+        android:title="Search"
+        android:icon="@drawable/icon_list"
+        app:showAsAction="collapseActionView|ifRoom">
+    </item>
+
+    <item
+        android:id="@+id/main_action_noti"
+        android:orderInCategory="200"
+        android:icon="@drawable/icon_noti"
+        app:showAsAction="ifRoom"
+        android:title="">
+    </item>
+</menu>
