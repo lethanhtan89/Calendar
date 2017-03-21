@@ -32,6 +32,22 @@ public class Utils {
         ArrayList<Image> filePaths = new ArrayList<Image>();
 
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
+//        try {
+//            ExifInterface exifInterface = new ExifInterface(file.getPath());
+//            int oritation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+//            int angle = 0;
+//
+//            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+//                angle = 90;
+//            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+//                angle = 180;
+//            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+//                angle = 270;
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
 
         // check for directory
         if (file.isDirectory()) {

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,6 +26,7 @@ import com.roomorama.caldroid.CaldroidListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -224,25 +226,40 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
 
     private void previewCapturedImage() {
         try {
-            // bimatp factory
+            ExifInterface exif = new ExifInterface(uriCameraImage.getPath());
+            int orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
+
+            int angle = 0;
+
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                angle = 90;
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                angle = 180;
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                angle = 270;
+            }
+
+            Matrix matrix = new Matrix();
+            matrix.postRotate(angle);
+
             BitmapFactory.Options options = new BitmapFactory.Options();
             // downsizing image as it throws OutOfMemory Exception for larger
             // images
 
-            options.inSampleSize = 16;
-            //options.inScreenDensity = 1;
+            options.inSampleSize = 8;
             bitmap = BitmapFactory.decodeFile(uriCameraImage.getPath(), options);
-            //Drawable drawable = Drawable.createFromPath(uriCameraImage.getPath());
-
-            //imgLoad.setImageBitmap(bitmap);
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+
             extraData = caldroidFragment.getExtraData();
             extraData.put(BITAMP, bitmap);
             caldroidFragment.refreshView();
 
         } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -283,9 +300,6 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
     }
 
     private void upload(){
-//        Intent intent = new Intent(Intent.ACTION_PICK);
-//        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-//        startActivityForResult(intent, IMAGE_GALLERY);
         Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(i, IMAGE_GALLERY);
     }
@@ -309,10 +323,5 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         if (caldroidFragment != null) {
             caldroidFragment.saveStatesToKey(outState, "CALDROID_SAVED_STATE");
         }
-
-//        if (dialogCaldroidFragment != null) {
-//            dialogCaldroidFragment.saveStatesToKey(outState,
-//                    "DIALOG_CALDROID_SAVED_STATE");
-//        }
     }
 }

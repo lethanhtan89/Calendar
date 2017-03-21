@@ -2,6 +2,7 @@ package com.example.administrator.calendar.images;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -30,7 +31,7 @@ import java.util.Date;
  * Created by Administrator on 3/17/2017.
  */
 
-public class SliderActivity extends AppCompatActivity implements View.OnClickListener{
+public class SliderActivity extends AppCompatActivity implements View.OnClickListener, ImageAdapter.ImageListener{
     ViewPager viewPager;
     ImageAdapter adapter;
     TextView textView;
@@ -47,6 +48,7 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
     public static final String BITAMP = "bitmap";
     private int columnWidth;
     ArrayList<Image> imageArrayList;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +58,6 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void init(){
-        //columnWidth = (int) ((utils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS + 1) * padding)) / AppConstant.NUM_OF_COLUMNS);
         utils = new Utils(this);
 
         //addBottomDots(0);
@@ -65,7 +66,7 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
         imageArrayList = utils.getFilePaths(date);
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         //dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
-        adapter = new ImageAdapter(this, imageArrayList, 1024);
+        adapter = new ImageAdapter(this, imageArrayList, 1024, this);
         viewPager.setAdapter(adapter);
     }
 
@@ -122,7 +123,21 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
         int id = v.getId();
         switch (id){
             case R.id.txtToolBarImage:
-                Toast.makeText(getApplicationContext(), "Watch", Toast.LENGTH_SHORT).show();
+                String images = "";
+                Bitmap bitmap;
+                for(Image hold: adapter.getAllData()){
+                    if(hold.isSelect()){
+                        images += hold.getUrl() + "#";
+
+                    }
+                }
+                bitmap = BitmapFactory.decodeFile(images);
+                Toast.makeText(getApplicationContext(), "" + images, Toast.LENGTH_SHORT).show();
+
+//                Intent intent = new Intent(getApplicationContext(), CompareActivity.class);
+//                intent.putExtra(AppConstant.CHECKBOX, images);
+//                startActivity(intent);
+
         }
     }
 
@@ -137,4 +152,9 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    @Override
+    public void onCickCheckbox(int position) {
+
+        adapter.setCheckBox(position);
+    }
 }
