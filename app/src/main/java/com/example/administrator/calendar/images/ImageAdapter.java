@@ -182,8 +182,6 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
     public void onClick(View v) {
         int id = v.getId();
         switch (id){
-
-
         }
     }
 

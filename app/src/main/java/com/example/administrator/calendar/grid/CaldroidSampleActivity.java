@@ -1,7 +1,9 @@
 package com.example.administrator.calendar.grid;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -44,9 +46,11 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
     public static final String BITAMP = "bitmap";
     private Uri uriCameraImage;
     private static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
-    TextView txtPicture, txtUpload, txtCompare;
+    private TextView txtPicture, txtUpload, txtCompare;
     Bitmap bitmap;
     Map<String, Object> extraData;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
     private void setCustomResourceForDates() {
         Calendar cal = Calendar.getInstance();
@@ -78,6 +82,8 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         setupToolbar();
         init();
         setupCalendar();
+        sharedPreferences = getSharedPreferences(AppConstant.PRE, Context.MODE_PRIVATE);
+        editor= sharedPreferences.edit();
 
         final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
 
@@ -252,7 +258,8 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
             bitmap = BitmapFactory.decodeFile(uriCameraImage.getPath(), options);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
-
+            SharePreference sharePreference = new SharePreference(getApplicationContext());
+            sharePreference.setImagetoPre(bitmap);
             extraData = caldroidFragment.getExtraData();
             extraData.put(BITAMP, bitmap);
             caldroidFragment.refreshView();

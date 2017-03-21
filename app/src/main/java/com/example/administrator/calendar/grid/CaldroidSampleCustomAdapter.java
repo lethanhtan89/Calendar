@@ -1,12 +1,10 @@
 package com.example.administrator.calendar.grid;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -101,15 +99,10 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 		if (shouldResetDiabledView && shouldResetSelectedView) {
 			// Customize for today
 			if (dateTime.equals(getToday())) {
+				SharePreference sharePreference = new SharePreference(context);
 				cellView.setBackgroundResource(R.color.bg_screen4);
-				SharedPreferences shre = PreferenceManager.getDefaultSharedPreferences(context);
-				String previouslyEncodedImage = shre.getString("image_data", "");
-
-				if( !previouslyEncodedImage.equalsIgnoreCase("") ){
-					Bitmap bitmap = (Bitmap) getExtraData().get(BITAMP);
-					tv2.setImageBitmap(bitmap);
-				}
-
+				Bitmap bitmap = (Bitmap) getExtraData().get(BITAMP);
+				tv2.setImageBitmap(sharePreference.getImagefromPre(bitmap));
 
 			} else {
 				cellView.setBackgroundResource(com.caldroid.R.drawable.cell_bg);

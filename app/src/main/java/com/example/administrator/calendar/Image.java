@@ -1,5 +1,7 @@
 package com.example.administrator.calendar;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 
 import java.io.Serializable;
@@ -68,5 +70,21 @@ public class Image implements Serializable{
 
     public void setSelect(boolean select) {
         this.select = select;
+    }
+
+    public void saveImagetoPre(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(AppConstant.PRE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("url", url);
+        editor.commit();
+    }
+
+    public Image loadImagePre(Context context){
+        Image image = null;
+        SharedPreferences sharedPreferences = context.getSharedPreferences(AppConstant.PRE, Context.MODE_WORLD_READABLE);
+        if(image != null){
+            image.url = sharedPreferences.getString("url", image.getUrl());
+        }
+        return image;
     }
 }
