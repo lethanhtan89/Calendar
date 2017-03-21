@@ -2,17 +2,23 @@ package com.example.administrator.calendar;
 
 import android.graphics.Bitmap;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by Administrator on 3/15/2017.
  */
 
-public class Image {
+public class Image implements Serializable{
     private Date date;
     private Bitmap bitmap;
     private String url;
+    private boolean select = false;
 
+    public Image(String url, boolean select){
+        this.url = url;
+        this.select = select;
+    }
 
     public Image(Bitmap bitmap, String url){
         this.bitmap = bitmap;
@@ -54,5 +60,13 @@ public class Image {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public boolean isSelect() {
+        return select;
+    }
+
+    public void setSelect(boolean select) {
+        this.select = select;
     }
 }

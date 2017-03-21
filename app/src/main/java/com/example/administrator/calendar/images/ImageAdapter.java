@@ -1,25 +1,31 @@
 package com.example.administrator.calendar.images;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.administrator.calendar.Image;
 import com.example.administrator.calendar.R;
+import com.example.administrator.calendar.grid.CaldroidSampleActivity;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,23 +37,23 @@ import static com.example.administrator.calendar.R.id.textView;
  * Created by Administrator on 3/17/2017.
  */
 
-public class ImageAdapter extends PagerAdapter {
+public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
     public static final String BITAMP = "bitmap";
-    //private int[] images = {R.drawable.ic_travel, R.drawable.ic_movie, R.drawable.ic_food, R.drawable.ic_discount};
-    private String[] img;
     private Context context;
-    private static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
-    String targetPath;
     Map<String, Object> extraData;
     ArrayList<Image> imageArrayList;
     private int imageWidth;
-    TextView txtTilte, txtTime;
+    TextView txtTilte, txtTime, txtCheck, txtCancel;
+    CheckBox checkBox;
     Date date;
     Image image;
-    public ImageAdapter(Context context, ArrayList<Image> imageArrayList, int imageWidth){
+    Bitmap bitmap;
+    ImageListener imageListener;
+    public ImageAdapter(Context context, ArrayList<Image> imageArrayList, int imageWidth, ImageListener imageListener){
         this.context = context;
         this.imageArrayList = imageArrayList;
         this.imageWidth = imageWidth;
+        this.imageListener = imageListener;
     }
     @Override
     public int getCount() {
@@ -60,28 +66,66 @@ public class ImageAdapter extends PagerAdapter {
     }
 
     @Override
-    public Object instantiateItem(ViewGroup container, final int position) {
+    public Object instantiateItem(final ViewGroup container, final int position) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View  view = inflater.inflate(R.layout.item_image, container, false);
-        final ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
         txtTilte = (TextView) view.findViewById(textView);
         txtTime = (TextView) view.findViewById(R.id.txtTime);
+        checkBox = (CheckBox) view.findViewById(R.id.checkbox);
+        txtCancel = (TextView) view.findViewById(R.id.txtCancel);
         final LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.lnImage);
-        //Image image = imageArrayList.get(position);
 
-//        Bitmap image = (Bitmap) getExtraData().get(BITAMP);
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked == true){
+                    if(imageListener!= null){
+                        imageListener.onCickCheckbox(position);
+                    }
+                }
+            }
+        });
+
 
         txtTilte.setText("Image: " + position);
+        txtCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeImage(position);
+            }
+        });
+
 
         new AsyncTask<String, Void, Bitmap>(){
 
             @Override
             protected Bitmap doInBackground(String... params) {
+
                 image = imageArrayList.get(position);
-                Bitmap bitmap = decodeFile(image.getUrl(), imageWidth, imageWidth);
-                Matrix matrix = new Matrix();
-                matrix.postRotate(90);
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                ExifInterface exif = null;
+                try {
+                    exif = new ExifInterface(image.getUrl());
+                    int orientation = exif.getAttributeInt(
+                            ExifInterface.TAG_ORIENTATION,
+                            ExifInterface.ORIENTATION_NORMAL);
+
+                    int angle = 0;
+
+                    if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                        angle = 90;
+                    } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                        angle = 180;
+                    } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                        angle = 270;
+                    }
+
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(angle);
+                    bitmap = decodeFile(image.getUrl(), imageWidth, imageWidth);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 return bitmap;
             }
@@ -89,7 +133,6 @@ public class ImageAdapter extends PagerAdapter {
             @Override
             protected void onPostExecute(Bitmap bitmap) {
                 super.onPostExecute(bitmap);
-                //imageView.setImageBitmap(bitmap);
                 linearLayout.setBackgroundDrawable(new BitmapDrawable(context.getResources(), bitmap));
                 final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
                 txtTime.setText("" + formatter.format(image.getDate()));
@@ -134,4 +177,33 @@ public class ImageAdapter extends PagerAdapter {
         }
         return null;
     }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id){
+
+
+        }
+    }
+
+    public void setCheckBox(int position){
+        Image image = imageArrayList.get(position);
+        image.setSelect(!image.isSelect());
+        notifyDataSetChanged();
+    }
+
+    public ArrayList<Image> getAllData(){
+        return imageArrayList;
+    }
+
+    private void removeImage(int position){
+        image = imageArrayList.remove(position);
+        Intent intent = new Intent(context, CaldroidSampleActivity.class);
+        context.startActivity(intent);
+        Toast.makeText(context,"Removed", Toast.LENGTH_SHORT).show();
+    }
+     public interface ImageListener{
+         void onCickCheckbox(int position);
+     }
 }

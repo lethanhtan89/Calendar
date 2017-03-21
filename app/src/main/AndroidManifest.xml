@@ -26,10 +26,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".images.ImagesActivity" />
         <activity android:name=".images.SliderActivity" android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".slider.SliderCusActivity" android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".slider.SliderExampleActivity" />
+        <activity android:name=".CompareActivity" />
     </application>
 
 </manifest>
