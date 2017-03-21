@@ -22,7 +22,6 @@ import hirondelle.date4j.DateTime;
 
 public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 	private ImageView tv2;
-	Bitmap bitmapOut;
 	public static final String BITAMP = "bitmap";
 
 	public CaldroidSampleCustomAdapter(Context context, int month, int year,

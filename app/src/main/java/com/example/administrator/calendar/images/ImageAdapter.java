@@ -28,7 +28,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Map;
 
 import static com.example.administrator.calendar.R.id.textView;
@@ -38,14 +37,12 @@ import static com.example.administrator.calendar.R.id.textView;
  */
 
 public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
-    public static final String BITAMP = "bitmap";
     private Context context;
     Map<String, Object> extraData;
     ArrayList<Image> imageArrayList;
     private int imageWidth;
-    TextView txtTilte, txtTime, txtCheck, txtCancel;
+    TextView txtTilte, txtTime, txtCancel;
     CheckBox checkBox;
-    Date date;
     Image image;
     Bitmap bitmap;
     ImageListener imageListener;
@@ -86,7 +83,6 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
             }
         });
 
-
         txtTilte.setText("Image: " + position);
         txtCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,12 +91,9 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
             }
         });
 
-
         new AsyncTask<String, Void, Bitmap>(){
-
             @Override
             protected Bitmap doInBackground(String... params) {
-
                 image = imageArrayList.get(position);
                 ExifInterface exif = null;
                 try {
@@ -126,7 +119,6 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 return bitmap;
             }
 
@@ -139,7 +131,6 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
             }
         }.execute();
 
-
         container.addView(view);
         return view;
     }
@@ -147,10 +138,6 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.refreshDrawableState();
-    }
-
-    public Map<String, Object> getExtraData() {
-        return extraData;
     }
 
     public static Bitmap decodeFile(String filePath, int WIDTH, int HIGHT) {

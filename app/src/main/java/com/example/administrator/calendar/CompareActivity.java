@@ -1,17 +1,23 @@
 package com.example.administrator.calendar;
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.media.ExifInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -19,72 +25,104 @@ import java.util.ArrayList;
  */
 
 public class CompareActivity extends AppCompatActivity {
-    Image image;
-    Bitmap[] arrBitmap;
-    Bitmap bitmap;
+    private Bitmap bitmap;
+    private ArrayList<Bitmap> bitmapArrayList;
+    private ImageView imageView;
+    private ProgressDialog dialog;
+    private Matrix matrix;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compare);
-        ImageView imageView = (ImageView) findViewById(R.id.imgCompare);
-        TextView textView = (TextView) findViewById(R.id.txtCompare);
-        String string_intent = (String) getIntent().getExtras().get(AppConstant.CHECKBOX);
-        String[] arrImg = string_intent.split("#");
-        ArrayList<Image> imageArrayList = new ArrayList<>();
-        for(int i = 0; i < arrImg.length; i++){
-            imageArrayList.add(new Image(arrImg[i]));
-        }
-        for(int i = 0; i < imageArrayList.size(); i++){
-            image = imageArrayList.get(i);
-            bitmap = BitmapFactory.decodeFile(image.getUrl());
-            arrBitmap = new Bitmap[]{bitmap};
+        setupToolbar();
+        bitmapArrayList = new ArrayList<>();
+        imageView = (ImageView) findViewById(R.id.imgCompare);
 
-            Toast.makeText(getApplicationContext(), arrBitmap + "", Toast.LENGTH_SHORT).show();
-        }
-        Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(),R.drawable.ic_check);
-        Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(),R.drawable.ic_check_select);
-        Bitmap bitmap3 = BitmapFactory.decodeResource(getResources(),R.drawable.ic_cancel);
-        Bitmap bitmap4 = BitmapFactory.decodeResource(getResources(), R.drawable.ic_check_select);
+        new AsyncTask<String, Void, Bitmap>(){
 
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                dialog = new ProgressDialog(CompareActivity.this);
+                dialog.setMessage("Loading...");
+                dialog.show();
+            }
 
+            @Override
+            protected Bitmap doInBackground(String... params) {
+                String string_intent = (String) getIntent().getExtras().get(AppConstant.CHECKBOX);
+                String[] strings = string_intent.split("#");
+                for(int i = 0; i < strings.length; i++){
+                    try {
+                        ExifInterface exif = new ExifInterface(strings[i]);
+                        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
-        Bitmap mergedImg= mergeMultiple(arrBitmap);
+                        int angle = 0;
 
-        imageView.setImageBitmap(mergedImg);
+                        if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                            angle = 90;
+                        } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                            angle = 180;
+                        } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                            angle = 270;
+                        }
 
-        textView.setText("" + arrBitmap);
+                        matrix = new Matrix();
+                        matrix.postRotate(angle);
+
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inSampleSize = 2;
+                        bitmap = BitmapFactory.decodeFile(strings[i], options);
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                        bitmapArrayList.add(bitmap);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return bitmap;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                super.onPostExecute(bitmap);
+                dialog.dismiss();
+                bitmap = mergeMultiple(bitmapArrayList);
+                imageView.setImageBitmap(bitmap);
+            }
+        }.execute();
     }
 
-    private Bitmap mergeMultiple(Bitmap[] parts){
+    private Bitmap mergeMultiple(ArrayList<Bitmap> parts){
 
-        Bitmap result = Bitmap.createBitmap(parts[0].getWidth() * 2, parts[0].getHeight() * 2, Bitmap.Config.ARGB_8888);
+        Bitmap result = Bitmap.createBitmap(parts.get(0).getWidth() * 2, parts.get(0).getHeight() * 2, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
-        for (int i = 0; i < parts.length; i++) {
-            canvas.drawBitmap(parts[i], parts[i].getWidth() * (i % 2), parts[i].getHeight() * (i / 2), paint);
+        for (int i = 0; i < parts.size(); i++) {
+            canvas.drawBitmap(parts.get(i), parts.get(i).getWidth() * (i % 2), parts.get(i).getHeight() * ((i / 2)), paint);
         }
         return result;
     }
 
-    private Bitmap combineImageIntoOne(ArrayList<Bitmap> bitmap) {
-        int w = 0, h = 0;
-        for (int i = 0; i < bitmap.size(); i++) {
-            if (i < bitmap.size() - 1) {
-                w = bitmap.get(i).getWidth() > bitmap.get(i + 1).getWidth() ? bitmap.get(i).getWidth() : bitmap.get(i + 1).getWidth();
-            }
-            h += bitmap.get(i).getHeight();
-        }
-
-        Bitmap temp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(temp);
-        int top = 0;
-        for (int i = 0; i < bitmap.size(); i++) {
-            Log.d("HTML", "Combine: "+i+"/"+bitmap.size()+1);
-
-            top = (i == 0 ? 0 : top+bitmap.get(i).getHeight());
-            canvas.drawBitmap(bitmap.get(i), 0f, top, null);
-        }
-        return temp;
+    private void setupToolbar(){
+        Toolbar toolbar = (Toolbar) findViewById(R.id.compare_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(" ");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        TextView txtToolbar = (TextView) findViewById(R.id.txtToolBarCompare);
+        txtToolbar.setText("Compare");
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == android.R.id.home)
+            onBackPressed();
+        return super.onOptionsItemSelected(item);
+    }
 }

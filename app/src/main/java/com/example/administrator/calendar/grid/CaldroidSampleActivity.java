@@ -1,6 +1,7 @@
 package com.example.administrator.calendar.grid;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -51,6 +53,7 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
     Map<String, Object> extraData;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+    private ProgressDialog dialog;
 
     private void setCustomResourceForDates() {
         Calendar cal = Calendar.getInstance();
@@ -231,44 +234,64 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
     }
 
     private void previewCapturedImage() {
-        try {
-            ExifInterface exif = new ExifInterface(uriCameraImage.getPath());
-            int orientation = exif.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL);
-
-            int angle = 0;
-
-            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
-                angle = 90;
-            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
-                angle = 180;
-            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
-                angle = 270;
+        new AsyncTask<String, Void, Bitmap>(){
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                dialog = new ProgressDialog(CaldroidSampleActivity.this);
+                dialog.setMessage("Loading...");
+                dialog.show();
             }
 
-            Matrix matrix = new Matrix();
-            matrix.postRotate(angle);
+            @Override
+            protected Bitmap doInBackground(String... params) {
+                try {
+                    ExifInterface exif = new ExifInterface(uriCameraImage.getPath());
+                    int orientation = exif.getAttributeInt(
+                            ExifInterface.TAG_ORIENTATION,
+                            ExifInterface.ORIENTATION_NORMAL);
 
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            // downsizing image as it throws OutOfMemory Exception for larger
-            // images
+                    int angle = 0;
 
-            options.inSampleSize = 8;
-            bitmap = BitmapFactory.decodeFile(uriCameraImage.getPath(), options);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                        angle = 90;
+                    } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                        angle = 180;
+                    } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                        angle = 270;
+                    }
 
-            SharePreference sharePreference = new SharePreference(getApplicationContext());
-            sharePreference.setImagetoPre(bitmap);
-            extraData = caldroidFragment.getExtraData();
-            extraData.put(BITAMP, bitmap);
-            caldroidFragment.refreshView();
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(angle);
 
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    // downsizing image as it throws OutOfMemory Exception for larger
+                    // images
+
+                    options.inSampleSize = 4;
+                    bitmap = BitmapFactory.decodeFile(uriCameraImage.getPath(), options);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return bitmap;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                super.onPostExecute(bitmap);
+                dialog.dismiss();
+                SharePreference sharePreference = new SharePreference(getApplicationContext());
+                sharePreference.setImagetoPre(bitmap);
+                extraData = caldroidFragment.getExtraData();
+                extraData.put(BITAMP, bitmap);
+                caldroidFragment.refreshView();
+            }
+        }.execute();
+
     }
 
     @Override

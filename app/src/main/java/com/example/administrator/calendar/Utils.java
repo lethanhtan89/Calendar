@@ -2,10 +2,7 @@ package com.example.administrator.calendar;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Point;
 import android.os.Environment;
-import android.view.Display;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.io.File;
@@ -30,25 +27,7 @@ public class Utils {
     // Reading file paths from SDCard
     public ArrayList<Image> getFilePaths(Date date) {
         ArrayList<Image> filePaths = new ArrayList<Image>();
-
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
-//        try {
-//            ExifInterface exifInterface = new ExifInterface(file.getPath());
-//            int oritation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-//            int angle = 0;
-//
-//            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
-//                angle = 90;
-//            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
-//                angle = 180;
-//            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
-//                angle = 270;
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-
         // check for directory
         if (file.isDirectory()) {
             // getting list of file paths
@@ -62,7 +41,6 @@ public class Utils {
 
                     // get file path
                     String filePath = null;
-                    String datetime = null;
 
                     filePath = listFiles[i].getPath();
                     date = new Date();
@@ -84,8 +62,7 @@ public class Utils {
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(_context);
             alert.setTitle("Error!");
-            alert.setMessage(AppConstant.IMAGE_DIRECTORY_NAME
-                    + " directory path is not valid! Please set the image directory name AppConstant.java class");
+            alert.setMessage(AppConstant.IMAGE_DIRECTORY_NAME + " directory path is not valid! Please set the image directory name AppConstant.java class");
             alert.setPositiveButton("OK", null);
             alert.show();
         }
@@ -101,26 +78,5 @@ public class Utils {
             return true;
         else
             return false;
-
-    }
-
-    /*
-     * getting screen width
-     */
-    public int getScreenWidth() {
-        int columnWidth;
-        WindowManager wm = (WindowManager) _context
-                .getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-
-        final Point point = new Point();
-        try {
-            display.getSize(point);
-        } catch (java.lang.NoSuchMethodError ignore) { // Older device
-            point.x = display.getWidth();
-            point.y = display.getHeight();
-        }
-        columnWidth = point.x;
-        return columnWidth;
     }
 }

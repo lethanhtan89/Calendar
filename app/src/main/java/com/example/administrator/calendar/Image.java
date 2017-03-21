@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -16,6 +17,16 @@ public class Image implements Serializable{
     private Bitmap bitmap;
     private String url;
     private boolean select = false;
+    Bitmap[] bitmaps;
+    ArrayList<Bitmap> bitmapArrayList;
+
+    public Image(ArrayList<Bitmap> bitmapArrayList){
+        this.bitmapArrayList = bitmapArrayList;
+    }
+
+    public Image(Bitmap[] bitmaps){
+        this.bitmaps = bitmaps;
+    }
 
     public Image(String url, boolean select){
         this.url = url;
@@ -86,5 +97,21 @@ public class Image implements Serializable{
             image.url = sharedPreferences.getString("url", image.getUrl());
         }
         return image;
+    }
+
+    public Bitmap[] getBitmaps() {
+        return bitmaps;
+    }
+
+    public void setBitmaps(Bitmap[] bitmaps) {
+        this.bitmaps = bitmaps;
+    }
+
+    public ArrayList<Bitmap> getBitmapArrayList() {
+        return bitmapArrayList;
+    }
+
+    public void setBitmapArrayList(ArrayList<Bitmap> bitmapArrayList) {
+        this.bitmapArrayList = bitmapArrayList;
     }
 }
