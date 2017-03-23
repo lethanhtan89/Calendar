@@ -20,6 +20,7 @@ public class AppConstant {
     public static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
     public static final String DATE = "date";
     public static final String CHECKBOX = "checkbox";
+    public static final String PRE = "sharepreference";
 
     // supported file formats
     public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg", "png");

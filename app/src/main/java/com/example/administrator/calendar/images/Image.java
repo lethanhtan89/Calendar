@@ -1,8 +1,9 @@
-package com.example.administrator.calendar;
+package com.example.administrator.calendar.images;
 
 import android.graphics.Bitmap;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -14,36 +15,18 @@ public class Image implements Serializable{
     private Bitmap bitmap;
     private String url;
     private boolean select = false;
-
-    public Image(String url, boolean select){
-        this.url = url;
-        this.select = select;
-    }
-
-    public Image(Bitmap bitmap, String url){
-        this.bitmap = bitmap;
-        this.url = url;
-    }
+    Bitmap[] bitmaps;
+    ArrayList<Bitmap> bitmapArrayList;
+    private String time;
 
     public Image(String url, Date date){
         this.url = url;
         this.date = date;
     }
 
-    public Image(String url){
+    public Image(String url, String time){
         this.url = url;
-    }
-
-    public Image(Bitmap bitmap){
-        this.bitmap = bitmap;
-    }
-
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
+        this.time = time;
     }
 
     public String getUrl() {
@@ -68,5 +51,13 @@ public class Image implements Serializable{
 
     public void setSelect(boolean select) {
         this.select = select;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

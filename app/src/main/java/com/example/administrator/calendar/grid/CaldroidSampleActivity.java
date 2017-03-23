@@ -1,12 +1,17 @@
 package com.example.administrator.calendar.grid;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -20,6 +25,7 @@ import android.widget.Toast;
 
 import com.example.administrator.calendar.AppConstant;
 import com.example.administrator.calendar.R;
+import com.example.administrator.calendar.images.Image;
 import com.example.administrator.calendar.images.SliderActivity;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
@@ -29,6 +35,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -44,9 +51,15 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
     public static final String BITAMP = "bitmap";
     private Uri uriCameraImage;
     private static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
-    TextView txtPicture, txtUpload, txtCompare;
+    private TextView txtPicture, txtUpload, txtCompare;
     Bitmap bitmap;
     Map<String, Object> extraData;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+    private ProgressDialog dialog;
+
+    ArrayList<Image> imageArrayList;
+    SimpleDateFormat formatter;
 
     private void setCustomResourceForDates() {
         Calendar cal = Calendar.getInstance();
@@ -78,8 +91,10 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         setupToolbar();
         init();
         setupCalendar();
+        sharedPreferences = getSharedPreferences(AppConstant.PRE, Context.MODE_PRIVATE);
+        editor= sharedPreferences.edit();
 
-        final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
+        formatter = new SimpleDateFormat("dd MMM yyyy");
 
         // Setup caldroid fragment
         // **** If you want normal CaldroidFragment, use below line ****
@@ -88,7 +103,7 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         // //////////////////////////////////////////////////////////////////////
         // **** This is to show customized fragment. If you want customized
         // version, uncomment below line ****
-		 caldroidFragment = new CaldroidSampleCustomFragment();
+		caldroidFragment = new CaldroidSampleCustomFragment();
 
         // Setup arguments
 
@@ -130,9 +145,9 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
 
             @Override
             public void onSelectDate(Date date, View view) {
-                Toast.makeText(getApplicationContext(), formatter.format(date), Toast.LENGTH_SHORT).show();
+                ArrayList<Image> imageArrayList = getFilePaths();
                 Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
-                intent.putExtra(AppConstant.DATE, date);
+                intent.putExtra(AppConstant.DATE, imageArrayList);
                 startActivity(intent);
             }
 
@@ -142,10 +157,12 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
 
             @Override
             public void onLongClickDate(Date date, View view) {
+                Toast.makeText(getApplicationContext(), "Long click: " + view, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onCaldroidViewCreated() {
+
             }
 
         };
@@ -162,6 +179,7 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         txtPicture.setOnClickListener(this);
         txtUpload.setOnClickListener(this);
         txtCompare.setOnClickListener(this);
+
     }
 
     private void setupToolbar(){
@@ -185,7 +203,7 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
                 upload();
                 break;
             case R.id.txtCompare:
-                Toast.makeText(getApplicationContext(), uriCameraImage + "", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), uriCameraImage.getPath(), Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -196,6 +214,8 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uriCameraImage);
         // start the image capture Intent
         startActivityForResult(intent, IMAGE_CAMERA);
+
+
     }
 
     public Uri getOutputMediaFileUri(int type) {
@@ -203,65 +223,88 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
     }
 
     public static File getOutputMediaFile(int type) {
+        File mediaFile = null;
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         // External sdcard location
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
-        // Create the storage directory if it does not exist
+
+                // Create the storage directory if it does not exist
+        boolean success = true;
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
                 Log.d(IMAGE_DIRECTORY_NAME, "Oops! Failed create " + IMAGE_DIRECTORY_NAME + " directory");
                 return null;
             }
+
         }
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        File mediaFile;
+
         if (type == MEDIA_TYPE_IMAGE) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
         }
         else {
-            return null;
+               return null;
+
         }
         return mediaFile;
     }
 
     private void previewCapturedImage() {
-        try {
-            ExifInterface exif = new ExifInterface(uriCameraImage.getPath());
-            int orientation = exif.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL);
-
-            int angle = 0;
-
-            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
-                angle = 90;
-            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
-                angle = 180;
-            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
-                angle = 270;
+        new AsyncTask<String, Void, Bitmap>(){
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                dialog = new ProgressDialog(CaldroidSampleActivity.this);
+                dialog.setMessage("Loading...");
+                dialog.show();
             }
 
-            Matrix matrix = new Matrix();
-            matrix.postRotate(angle);
+            @Override
+            protected Bitmap doInBackground(String... params) {
+                try {
+                    ExifInterface exif = new ExifInterface(uriCameraImage.getPath());
+                    int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            // downsizing image as it throws OutOfMemory Exception for larger
-            // images
+                    int angle = 0;
 
-            options.inSampleSize = 8;
-            bitmap = BitmapFactory.decodeFile(uriCameraImage.getPath(), options);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                        angle = 90;
+                    } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                        angle = 180;
+                    } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                        angle = 270;
+                    }
 
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(angle);
 
-            extraData = caldroidFragment.getExtraData();
-            extraData.put(BITAMP, bitmap);
-            caldroidFragment.refreshView();
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    // downsizing image as it throws OutOfMemory Exception for larger
+                    // images
 
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                    options.inSampleSize = 4;
+                    bitmap = BitmapFactory.decodeFile(uriCameraImage.getPath(), options);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return bitmap;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                super.onPostExecute(bitmap);
+                dialog.dismiss();
+                SharePreference sharePreference = new SharePreference(getApplicationContext());
+                sharePreference.setImagetoPre(bitmap);
+                extraData = caldroidFragment.getExtraData();
+                extraData.put(BITAMP, bitmap);
+                txtCompare.setText(uriCameraImage.getPath());
+                caldroidFragment.refreshView();
+            }
+        }.execute();
     }
 
     @Override
@@ -310,6 +353,58 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         String date = year + "/" + month + "/" + day;
+    }
+
+    public ArrayList<Image> getFilePaths() {
+        ArrayList<Image> filePaths = new ArrayList<Image>();
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
+        // check for directory
+        if (file.isDirectory()) {
+            // getting list of file paths
+            File[] listFiles = file.listFiles();
+
+            // Check for count
+            if (listFiles.length > 0) {
+
+                // loop through all files
+                for (int i = 0; i < listFiles.length; i++) {
+                    // get file path
+                    String filePath = null;
+
+                    filePath = listFiles[i].getPath();
+                    //date = new Date();
+                    Long date = listFiles[i].lastModified();
+                    Date data = new Date(date);
+                    // check for supported file extension
+                    if (IsSupportedFile(filePath)) {
+                        // Add image path to array list
+                        filePaths.add(new Image(filePath, data));
+                    }
+                }
+            } else {
+                // image directory is empty
+                Toast.makeText(CaldroidSampleActivity.this, AppConstant.IMAGE_DIRECTORY_NAME + " is empty. Please load some images in it !", Toast.LENGTH_LONG).show();
+            }
+
+        } else {
+            AlertDialog.Builder alert = new AlertDialog.Builder(CaldroidSampleActivity.this);
+            alert.setTitle("Error!");
+            alert.setMessage(AppConstant.IMAGE_DIRECTORY_NAME + " directory path is not valid! Please set the image directory name AppConstant.java class");
+            alert.setPositiveButton("OK", null);
+            alert.show();
+        }
+
+        return filePaths;
+    }
+
+    // Check supported file extensions
+    private boolean IsSupportedFile(String filePath) {
+        String ext = filePath.substring((filePath.lastIndexOf(".") + 1), filePath.length());
+
+        if (AppConstant.FILE_EXTN.contains(ext.toLowerCase(Locale.getDefault())))
+            return true;
+        else
+            return false;
     }
 
     /**
