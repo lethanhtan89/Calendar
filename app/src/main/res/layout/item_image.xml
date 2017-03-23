@@ -2,33 +2,37 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/lnImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-        <LinearLayout
+        android:orientation="vertical"
+        android:background="@color/colorPrimary">
+
+        <ImageView
+            android:layout_marginTop="0dp"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageView" />
+
+        <CheckBox
+            android:id="@+id/checkbox"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="20dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp">
-            <CheckBox
-                android:id="@+id/checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/white"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
-            <TextView
-                android:id="@+id/txtCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_cancel"/>
-        </LinearLayout>
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:background="@color/white"/>
+
+        <TextView
+            android:id="@+id/txtCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/ic_cancel"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,24 +41,18 @@
             android:id="@+id/textView"
             android:textStyle="bold"
             android:textColor="@color/white"
-            android:layout_marginTop="30dp"
-            android:gravity="center" />
-
-        <ImageView
             android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/imageView"
-            android:layout_weight="1"/>
+            android:gravity="center" />
         <TextView
             android:id="@+id/txtTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="15dp"
+            android:layout_marginBottom="30dp"
             android:gravity="center"
+            android:layout_alignParentBottom="true"
             android:layout_gravity="bottom"
             android:textColor="@color/white"/>
-    </LinearLayout>
+    </RelativeLayout>
 
 
 </LinearLayout>

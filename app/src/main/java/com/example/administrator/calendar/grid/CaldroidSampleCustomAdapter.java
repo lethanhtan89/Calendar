@@ -16,6 +16,8 @@ import com.example.administrator.calendar.R;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidGridAdapter;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import hirondelle.date4j.DateTime;
@@ -23,11 +25,14 @@ import hirondelle.date4j.DateTime;
 public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 	private ImageView tv2;
 	public static final String BITAMP = "bitmap";
-
+	SharePreference sharePreference;
+	SimpleDateFormat dateFormat;
+	Date date;
 	public CaldroidSampleCustomAdapter(Context context, int month, int year,
 			Map<String, Object> caldroidData,
 			Map<String, Object> extraData) {
 		super(context, month, year, caldroidData, extraData);
+		dateFormat = new SimpleDateFormat("dd MMM yyyy");
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -35,7 +40,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View cellView = convertView;
-
+		sharePreference = new SharePreference(context);
 		// For reuse
 		if (convertView == null) {
 			cellView = inflater.inflate(R.layout.custom_cell, null);
@@ -52,7 +57,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 		tv1.setTextColor(Color.BLACK);
 
 		// Get dateTime of this cell
-		DateTime dateTime = this.datetimeList.get(position);
+		final DateTime dateTime = this.datetimeList.get(position);
 		Resources resources = context.getResources();
 
 		// Set color of the dates in previous / next month
@@ -72,13 +77,13 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 			tv1.setTextColor(CaldroidFragment.disabledTextColor);
 
 			if (CaldroidFragment.disabledBackgroundDrawable == -1) {
-				cellView.setBackgroundResource(R.drawable.cell_bg);
+				cellView.setBackgroundResource(R.drawable.ic_check);
 			} else {
 				cellView.setBackgroundResource(CaldroidFragment.disabledBackgroundDrawable);
 			}
 
 			if (dateTime.equals(getToday())) {
-				cellView.setBackgroundResource(R.drawable.icon_noti);
+				cellView.setBackgroundResource(R.drawable.ic_check_select);
 			}
 
 		} else {
@@ -87,9 +92,12 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
 		// Customize for selected dates
 		if (selectedDates != null && selectedDates.indexOf(dateTime) != -1) {
-			cellView.setBackgroundColor(resources.getColor(R.color.bg_screen1));
-
-			tv1.setTextColor(Color.BLACK);
+//			cellView.setBackgroundColor(resources.getColor(R.color.bg_screen1));
+//
+//			tv1.setTextColor(Color.BLACK);
+			cellView.setBackgroundResource(R.color.bg_screen4);
+			Bitmap bitmap = (Bitmap) getExtraData().get(BITAMP);
+			tv2.setImageBitmap(sharePreference.getImagefromPre(bitmap));
 
 		} else {
 			shouldResetSelectedView = true;
@@ -98,11 +106,9 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 		if (shouldResetDiabledView && shouldResetSelectedView) {
 			// Customize for today
 			if (dateTime.equals(getToday())) {
-				SharePreference sharePreference = new SharePreference(context);
 				cellView.setBackgroundResource(R.color.bg_screen4);
 				Bitmap bitmap = (Bitmap) getExtraData().get(BITAMP);
 				tv2.setImageBitmap(sharePreference.getImagefromPre(bitmap));
-
 			} else {
 				cellView.setBackgroundResource(com.caldroid.R.drawable.cell_bg);
 			}

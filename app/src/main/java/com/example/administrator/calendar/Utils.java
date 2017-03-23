@@ -5,6 +5,8 @@ import android.content.Context;
 import android.os.Environment;
 import android.widget.Toast;
 
+import com.example.administrator.calendar.images.Image;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,7 +27,7 @@ public class Utils {
     }
 
     // Reading file paths from SDCard
-    public ArrayList<Image> getFilePaths(Date date) {
+    public ArrayList<Image> getFilePaths(Date data) {
         ArrayList<Image> filePaths = new ArrayList<Image>();
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
         // check for directory
@@ -37,26 +39,23 @@ public class Utils {
             if (listFiles.length > 0) {
 
                 // loop through all files
-                for (int i = 0; i < listFiles.length; i++) {
-
+                for (int i = listFiles.length - 1; i >= 0; i--) {
                     // get file path
                     String filePath = null;
 
                     filePath = listFiles[i].getPath();
-                    date = new Date();
+                    //date = new Date();
+                    Long date = listFiles[i].lastModified();
+                    data = new Date(date);
                     // check for supported file extension
                     if (IsSupportedFile(filePath)) {
                         // Add image path to array list
-                        filePaths.add(new Image(filePath, date));
+                        filePaths.add(new Image(filePath, data));
                     }
                 }
             } else {
                 // image directory is empty
-                Toast.makeText(
-                        _context,
-                        AppConstant.IMAGE_DIRECTORY_NAME
-                                + " is empty. Please load some images in it !",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(_context, AppConstant.IMAGE_DIRECTORY_NAME + " is empty. Please load some images in it !", Toast.LENGTH_LONG).show();
             }
 
         } else {

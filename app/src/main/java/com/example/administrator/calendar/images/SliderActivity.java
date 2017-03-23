@@ -15,13 +15,12 @@ import android.widget.TextView;
 
 import com.example.administrator.calendar.AppConstant;
 import com.example.administrator.calendar.CompareActivity;
-import com.example.administrator.calendar.Image;
 import com.example.administrator.calendar.R;
 import com.example.administrator.calendar.Utils;
 import com.example.administrator.calendar.grid.SharePreference;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by Administrator on 3/17/2017.
@@ -37,6 +36,7 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
 
     ArrayList<Image> imageArrayList;
     SharePreference sharePreference;
+    SimpleDateFormat dateFormat;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,15 +45,16 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
         setupToolbar();
         init();
         sharePreference = new SharePreference(getApplicationContext());
+        dateFormat = new SimpleDateFormat("yyyyMMdd");
     }
 
     private void init(){
         utils = new Utils(this);
+//        Date date = (Date) getIntent().getExtras().get(AppConstant.DATE);
 
+       // imageArrayList = utils.getFilePaths(date);
+        imageArrayList = (ArrayList<Image>) getIntent().getExtras().get(AppConstant.DATE);
 
-        Date date = (Date) getIntent().getExtras().get(AppConstant.DATE);
-
-        imageArrayList = utils.getFilePaths(date);
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
         addBottomDots(0);
