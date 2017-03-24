@@ -1,9 +1,11 @@
 package com.example.administrator.calendar.images;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -12,11 +14,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.administrator.calendar.AppConstant;
 import com.example.administrator.calendar.CompareActivity;
 import com.example.administrator.calendar.R;
 import com.example.administrator.calendar.Utils;
+import com.example.administrator.calendar.grid.CaldroidSampleActivity;
 import com.example.administrator.calendar.grid.SharePreference;
 
 import java.text.SimpleDateFormat;
@@ -54,7 +58,7 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
 
        // imageArrayList = utils.getFilePaths(date);
         imageArrayList = (ArrayList<Image>) getIntent().getExtras().get(AppConstant.DATE);
-
+//        imageArrayList = new ArrayList<>();
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
         addBottomDots(0);
@@ -119,12 +123,14 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
                 for(Image hold: adapter.getAllData()){
                     if(hold.isSelect()){
                         images += hold.getUrl() + "#";
+                        Intent intent = new Intent(getApplicationContext(), CompareActivity.class);
+                        intent.putExtra(AppConstant.CHECKBOX, images);
+                        startActivity(intent);
+                        finish();
+                    }else {
+                        Toast.makeText(getApplicationContext(), "Choose image, please", Toast.LENGTH_SHORT).show();
                     }
                 }
-
-                Intent intent = new Intent(getApplicationContext(), CompareActivity.class);
-                intent.putExtra(AppConstant.CHECKBOX, images);
-                startActivity(intent);
                 break;
         }
     }
@@ -132,6 +138,31 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onCickCheckbox(int position) {
         adapter.setCheckBox(position);
+    }
+
+    @Override
+    public void onRemoveImage(final int position) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(SliderActivity.this);
+        builder.setTitle("Delete");
+        builder.setMessage("Would you like to delete this image ?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                remove(position);
+                Toast.makeText(getApplicationContext(), "Successfull", Toast.LENGTH_SHORT).show();
+                dialog.cancel();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
     }
 
     @Override
@@ -147,5 +178,14 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+    private void remove(int position){
+        for(position = imageArrayList.size() - 1; position >= 0; position--) {
+            imageArrayList.remove(imageArrayList.get(position));
+            adapter.notifyDataSetChanged();
+        }
+        Intent intent = new Intent(getApplicationContext(), CaldroidSampleActivity.class);
+        startActivity(intent);
     }
 }

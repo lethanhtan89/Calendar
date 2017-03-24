@@ -1,6 +1,7 @@
 package com.example.administrator.calendar;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -16,6 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.administrator.calendar.grid.CaldroidSampleActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -121,8 +124,21 @@ public class CompareActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if(id == android.R.id.home)
-            onBackPressed();
+        if(id == android.R.id.home) {
+            intent();
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        intent();
+    }
+
+    private void intent(){
+        Intent intent = new Intent(getApplicationContext(), CaldroidSampleActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

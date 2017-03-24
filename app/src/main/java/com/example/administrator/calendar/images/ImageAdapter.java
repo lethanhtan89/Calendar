@@ -1,12 +1,9 @@
 package com.example.administrator.calendar.images;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.view.PagerAdapter;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,11 +12,9 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.administrator.calendar.R;
-import com.example.administrator.calendar.grid.CaldroidSampleActivity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -83,17 +78,19 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
             }
         });
 
-        txtTilte.setText("Image: " + position);
         txtCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setAlartCheckbox(position);
+                if(imageListener != null){
+                    imageListener.onRemoveImage(position);
+                }
             }
         });
 
         image = imageArrayList.get(position);
+        txtTilte.setText("Image: " + position);
         Glide.with(context).load(image.getUrl()).centerCrop().into(imageView);
-        txtTime.setText(formatter.format(image.getDate()));
+        txtTime.setText(formatter.format(image.getDate()) + "");
 
 //        new AsyncTask<String, Void, Bitmap>(){
 //            @Override
@@ -186,35 +183,11 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
     }
 
     private void removeImage(int position){
-        for(position = imageArrayList.size() - 1; position >= 0; position--) {
-            imageArrayList.remove(image);
-        }
-        Intent intent = new Intent(context, CaldroidSampleActivity.class);
-        context.startActivity(intent);
+
     }
      public interface ImageListener{
          void onCickCheckbox(int position);
+         void onRemoveImage(int position);
      }
 
-    private void setAlartCheckbox(final int position){
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Delete");
-        builder.setMessage("Would you like to delete this image ?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                removeImage(position);
-                Toast.makeText(context, "Successfull", Toast.LENGTH_SHORT).show();
-                dialog.cancel();
-            }
-        });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-    }
 }
