@@ -14,6 +14,7 @@ public class CaldroidSampleCustomFragment extends CaldroidFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.custom_cell, container, false);
+		init(view);
 		return super.onCreateView(inflater, container, savedInstanceState);
 	}
 
@@ -22,6 +23,10 @@ public class CaldroidSampleCustomFragment extends CaldroidFragment {
 		// TODO Auto-generated method stub
 		return new CaldroidSampleCustomAdapter(getActivity(), month, year,
 				getCaldroidData(), extraData);
+	}
+
+	private void init(View view){
+
 	}
 
 }

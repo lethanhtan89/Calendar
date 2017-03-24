@@ -19,6 +19,10 @@ public class Image implements Serializable{
     ArrayList<Bitmap> bitmapArrayList;
     private String time;
 
+    public Image(Date date){
+        this.date = date;
+    }
+
     public Image(String url, Date date){
         this.url = url;
         this.date = date;

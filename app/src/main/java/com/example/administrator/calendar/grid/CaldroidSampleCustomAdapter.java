@@ -28,9 +28,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 	SharePreference sharePreference;
 	SimpleDateFormat dateFormat;
 	Date date;
-	public CaldroidSampleCustomAdapter(Context context, int month, int year,
-			Map<String, Object> caldroidData,
-			Map<String, Object> extraData) {
+	public CaldroidSampleCustomAdapter(Context context, int month, int year, Map<String, Object> caldroidData, Map<String, Object> extraData) {
 		super(context, month, year, caldroidData, extraData);
 		dateFormat = new SimpleDateFormat("dd MMM yyyy");
 	}
@@ -57,7 +55,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 		tv1.setTextColor(Color.BLACK);
 
 		// Get dateTime of this cell
-		final DateTime dateTime = this.datetimeList.get(position);
+		final DateTime dateTime = datetimeList.get(position);
 		Resources resources = context.getResources();
 
 		// Set color of the dates in previous / next month

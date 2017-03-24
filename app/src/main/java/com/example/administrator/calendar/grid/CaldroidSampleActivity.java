@@ -57,6 +57,7 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     private ProgressDialog dialog;
+    Date dataDate;
 
     ArrayList<Image> imageArrayList;
     SimpleDateFormat formatter;
@@ -93,7 +94,6 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         setupCalendar();
         sharedPreferences = getSharedPreferences(AppConstant.PRE, Context.MODE_PRIVATE);
         editor= sharedPreferences.edit();
-
         formatter = new SimpleDateFormat("dd MMM yyyy");
 
         // Setup caldroid fragment
@@ -104,7 +104,6 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         // **** This is to show customized fragment. If you want customized
         // version, uncomment below line ****
 		caldroidFragment = new CaldroidSampleCustomFragment();
-
         // Setup arguments
 
         // If Activity is created after rotation
@@ -142,13 +141,71 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
 
         // Setup listener
         final CaldroidListener listener = new CaldroidListener() {
-
+            String date_selected;
             @Override
             public void onSelectDate(Date date, View view) {
-                ArrayList<Image> imageArrayList = getFilePaths();
-                Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
-                intent.putExtra(AppConstant.DATE, imageArrayList);
-                startActivity(intent);
+                ArrayList<Image> imageArrayList = new ArrayList<>();
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
+                File[] listFiles = file.listFiles();
+                Date dateFile = null;
+
+
+                if(formatter.format(date).equals("22 Mar 2017")) {
+                    if(listFiles.length > 0) {
+                        for(int i = 0; i < listFiles.length; i++){
+                            String filePath = listFiles[i].getPath();
+                            Long longFile = listFiles[i].lastModified();
+                            dateFile = new Date(longFile);
+                            if(formatter.format(dateFile).equals("22 Mar 2017")){
+                                imageArrayList.add(new Image(filePath, dateFile));
+                            }else {
+
+                            }
+                        }
+                        Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
+                        intent.putExtra(AppConstant.DATE, imageArrayList);
+                        startActivity(intent);
+                    }
+                }
+
+                if(formatter.format(date).equals("23 Mar 2017")) {
+                    if(listFiles.length > 0){
+                        for (int i = 0; i < listFiles.length; i++){
+                            String path = listFiles[i].getPath();
+                            Long longFile = listFiles[i].lastModified();
+                            dateFile = new Date(longFile);
+                            if(formatter.format(dateFile).equals("23 Mar 2017")){
+                                imageArrayList.add(new Image(path, dateFile));
+                            }else {
+
+                            }
+                        }
+                        Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
+                        intent.putExtra(AppConstant.DATE, imageArrayList);
+                        startActivity(intent);
+                    }
+                }
+
+                if(formatter.format(date).equals(formatter.format(new Date()))) {
+                    if(listFiles.length > 0){
+                        for(int i = listFiles.length - 1; i >= 0; i--){
+                            String pathFile = listFiles[i].getPath();
+                            Long longFile = listFiles[i].lastModified();
+                            dateFile = new Date(longFile);
+                            if(formatter.format(dateFile).equals(formatter.format(new Date()))) {
+                                imageArrayList.add(new Image(pathFile, dateFile));
+                            }
+                            else {
+                            }
+                        }
+
+                        Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
+                        intent.putExtra(AppConstant.DATE, imageArrayList);
+                        startActivity(intent);
+                    }else {
+                        Toast.makeText(getApplicationContext(), AppConstant.IMAGE_DIRECTORY_NAME + " is empty. Please load some images in it !", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
 
             @Override
@@ -157,7 +214,8 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
 
             @Override
             public void onLongClickDate(Date date, View view) {
-                Toast.makeText(getApplicationContext(), "Long click: " + view, Toast.LENGTH_SHORT).show();
+
+
             }
 
             @Override
@@ -203,7 +261,6 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
                 upload();
                 break;
             case R.id.txtCompare:
-                Toast.makeText(getApplicationContext(), uriCameraImage.getPath(), Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -228,7 +285,7 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         // External sdcard location
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
 
-                // Create the storage directory if it does not exist
+        // Create the storage directory if it does not exist
         boolean success = true;
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
@@ -301,7 +358,6 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
                 sharePreference.setImagetoPre(bitmap);
                 extraData = caldroidFragment.getExtraData();
                 extraData.put(BITAMP, bitmap);
-                txtCompare.setText(uriCameraImage.getPath());
                 caldroidFragment.refreshView();
             }
         }.execute();
@@ -372,13 +428,14 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
                     String filePath = null;
 
                     filePath = listFiles[i].getPath();
-                    //date = new Date();
+                    //get format date
                     Long date = listFiles[i].lastModified();
-                    Date data = new Date(date);
+                    dataDate = new Date(date);
+
                     // check for supported file extension
                     if (IsSupportedFile(filePath)) {
                         // Add image path to array list
-                        filePaths.add(new Image(filePath, data));
+                        filePaths.add(new Image(filePath, dataDate));
                     }
                 }
             } else {
@@ -419,4 +476,5 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
             caldroidFragment.saveStatesToKey(outState, "CALDROID_SAVED_STATE");
         }
     }
+
 }
