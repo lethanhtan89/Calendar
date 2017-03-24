@@ -123,12 +123,14 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
                 for(Image hold: adapter.getAllData()){
                     if(hold.isSelect()){
                         images += hold.getUrl() + "#";
+                        Intent intent = new Intent(getApplicationContext(), CompareActivity.class);
+                        intent.putExtra(AppConstant.CHECKBOX, images);
+                        startActivity(intent);
+                        finish();
+                    }else {
+                        Toast.makeText(getApplicationContext(), "Choose image, please", Toast.LENGTH_SHORT).show();
                     }
                 }
-
-                Intent intent = new Intent(getApplicationContext(), CompareActivity.class);
-                intent.putExtra(AppConstant.CHECKBOX, images);
-                startActivity(intent);
                 break;
         }
     }

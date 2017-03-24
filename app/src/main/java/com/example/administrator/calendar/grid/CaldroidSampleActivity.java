@@ -147,64 +147,25 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
                 ArrayList<Image> imageArrayList = new ArrayList<>();
                 File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
                 File[] listFiles = file.listFiles();
+                String filePath = "";
                 Date dateFile = null;
+                Long longFile;
 
-
-                if(formatter.format(date).equals("22 Mar 2017")) {
-                    if(listFiles.length > 0) {
-                        for(int i = 0; i < listFiles.length; i++){
-                            String filePath = listFiles[i].getPath();
-                            Long longFile = listFiles[i].lastModified();
-                            dateFile = new Date(longFile);
-                            if(formatter.format(dateFile).equals("22 Mar 2017")){
+                if(listFiles.length > 0){
+                    for (int i = listFiles.length - 1; i >= 0; i--){
+                        filePath = listFiles[i].getPath();
+                        longFile = listFiles[i].lastModified();
+                        dateFile = new Date(longFile);
+                        if(formatter.format(date).equals(formatter.format(dateFile))){
+                           // if(formatter.format(dateFile).equals(formatter.format(dateFile))){
                                 imageArrayList.add(new Image(filePath, dateFile));
-                            }else {
-
-                            }
+                          //  }
+                            Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
+                            intent.putExtra(AppConstant.DATE, imageArrayList);
+                            startActivity(intent);
                         }
-                        Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
-                        intent.putExtra(AppConstant.DATE, imageArrayList);
-                        startActivity(intent);
                     }
-                }
 
-                if(formatter.format(date).equals("23 Mar 2017")) {
-                    if(listFiles.length > 0){
-                        for (int i = 0; i < listFiles.length; i++){
-                            String path = listFiles[i].getPath();
-                            Long longFile = listFiles[i].lastModified();
-                            dateFile = new Date(longFile);
-                            if(formatter.format(dateFile).equals("23 Mar 2017")){
-                                imageArrayList.add(new Image(path, dateFile));
-                            }else {
-
-                            }
-                        }
-                        Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
-                        intent.putExtra(AppConstant.DATE, imageArrayList);
-                        startActivity(intent);
-                    }
-                }
-
-                if(formatter.format(date).equals(formatter.format(new Date()))) {
-                    if(listFiles.length > 0){
-                        for(int i = listFiles.length - 1; i >= 0; i--){
-                            String pathFile = listFiles[i].getPath();
-                            Long longFile = listFiles[i].lastModified();
-                            dateFile = new Date(longFile);
-                            if(formatter.format(dateFile).equals(formatter.format(new Date()))) {
-                                imageArrayList.add(new Image(pathFile, dateFile));
-                            }
-                            else {
-                            }
-                        }
-
-                        Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
-                        intent.putExtra(AppConstant.DATE, imageArrayList);
-                        startActivity(intent);
-                    }else {
-                        Toast.makeText(getApplicationContext(), AppConstant.IMAGE_DIRECTORY_NAME + " is empty. Please load some images in it !", Toast.LENGTH_SHORT).show();
-                    }
                 }
             }
 
