@@ -1,7 +1,6 @@
 package com.example.administrator.calendar.grid;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -57,32 +56,8 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     private ProgressDialog dialog;
-    Date dataDate;
-
     ArrayList<Image> imageArrayList;
     SimpleDateFormat formatter;
-
-    private void setCustomResourceForDates() {
-        Calendar cal = Calendar.getInstance();
-
-        // Min date is last 7 days
-        cal.add(Calendar.DATE, -7);
-        Date blueDate = cal.getTime();
-
-        // Max date is next 7 days
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, 7);
-        Date greenDate = cal.getTime();
-
-        if (caldroidFragment != null) {
-//            ColorDrawable blue = new ColorDrawable(Color.BLACK);
-//            ColorDrawable green = new ColorDrawable(Color.RED);
-//            caldroidFragment.setBackgroundDrawableForDate(blue, blueDate);
-//            caldroidFragment.setBackgroundDrawableForDate(green, greenDate);
-//            caldroidFragment.setTextColorForDate(R.color.white, blueDate);
-//            caldroidFragment.setTextColorForDate(R.color.white, greenDate);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,11 +79,12 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         // **** This is to show customized fragment. If you want customized
         // version, uncomment below line ****
 		caldroidFragment = new CaldroidSampleCustomFragment();
+
         // Setup arguments
 
         // If Activity is created after rotation
         if (savedInstanceState != null) {
-            caldroidFragment.restoreStatesFromKey(savedInstanceState, "CALDROID_SAVED_STATE");
+            caldroidFragment.restoreStatesFromKey(savedInstanceState, AppConstant.SAVE);
         }
         // If activity is created from fresh
         else {
@@ -119,20 +95,9 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
             args.putBoolean(CaldroidFragment.ENABLE_SWIPE, true);
             args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, true);
 
-            // Uncomment this to customize startDayOfWeek
-            // args.putInt(CaldroidFragment.START_DAY_OF_WEEK,
-            // CaldroidFragment.TUESDAY); // Tuesday
-
-            // Uncomment this line to use Caldroid in compact mode
-            // args.putBoolean(CaldroidFragment.SQUARE_TEXT_VIEW_CELL, false);
-
-            // Uncomment this line to use dark theme
-//            args.putInt(CaldroidFragment.THEME_RESOURCE, com.caldroid.R.style.CaldroidDefaultDark);
-
             caldroidFragment.setArguments(args);
         }
 
-        setCustomResourceForDates();
 
         // Attach to the activity
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
@@ -141,10 +106,9 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
 
         // Setup listener
         final CaldroidListener listener = new CaldroidListener() {
-            String date_selected;
             @Override
             public void onSelectDate(Date date, View view) {
-                ArrayList<Image> imageArrayList = new ArrayList<>();
+                imageArrayList = new ArrayList<>();
                 File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
                 File[] listFiles = file.listFiles();
                 String filePath = "";
@@ -157,12 +121,11 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
                         longFile = listFiles[i].lastModified();
                         dateFile = new Date(longFile);
                         if(formatter.format(date).equals(formatter.format(dateFile))){
-                           // if(formatter.format(dateFile).equals(formatter.format(dateFile))){
-                                imageArrayList.add(new Image(filePath, dateFile));
-                          //  }
+                            imageArrayList.add(new Image(filePath, dateFile));
                             Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
                             intent.putExtra(AppConstant.DATE, imageArrayList);
                             startActivity(intent);
+                            finish();
                         }
                     }
 
@@ -175,8 +138,35 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
 
             @Override
             public void onLongClickDate(Date date, View view) {
+                imageArrayList = new ArrayList<>();
+                ArrayList<Image> imageArrayList1 = new ArrayList<Image>();
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
+                File[] listFiles = file.listFiles();
+                String filePath;
+                Date dateFile;
+                Long longFile;
+                boolean checked = false;
 
+                view.setBackgroundResource(R.color.bg_screen2);
+                if (listFiles.length > 0) {
+                    for (int i = listFiles.length - 1; i >= 0; i--) {
+                        filePath = listFiles[i].getPath();
+                        longFile = listFiles[i].lastModified();
+                        dateFile = new Date(longFile);
+                        if (formatter.format(date).equals(formatter.format(dateFile))) {
+                            imageArrayList.add(new Image(filePath, dateFile));
+                        }
+                    }
+                    imageArrayList1.addAll(imageArrayList);
 
+                    Toast.makeText(getApplicationContext(), "" + imageArrayList1, Toast.LENGTH_SHORT).show();
+                    txtCompare.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            setMultipleDate();
+                        }
+                    });
+                }
             }
 
             @Override
@@ -191,6 +181,28 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         final Bundle state = savedInstanceState;
     }
 
+    private void setMultipleDate(){
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
+        File[] files = file.listFiles();
+        imageArrayList = new ArrayList<>();
+        String filePath;
+        Long fileLong = null;
+        Date fileDate;
+        if(files.length > 0){
+            for(int i = files.length - 1; i>= 0; i--){
+                filePath = files[i].getPath();
+                fileLong = files[i].lastModified();
+                fileDate = new Date(fileLong);
+                if(IsSupportedFile(filePath)) {
+                    imageArrayList.add(new Image(filePath, fileDate));
+                }
+            }
+            Intent intent = new Intent(getApplicationContext(), SliderActivity.class);
+            intent.putExtra(AppConstant.DATE, imageArrayList);
+            startActivity(intent);
+        }
+    }
+
     private void init(){
         txtPicture = (TextView) findViewById(R.id.txtPicture);
         txtUpload = (TextView) findViewById(R.id.txtUpload);
@@ -198,6 +210,7 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         txtPicture.setOnClickListener(this);
         txtUpload.setOnClickListener(this);
         txtCompare.setOnClickListener(this);
+
 
     }
 
@@ -222,6 +235,7 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
                 upload();
                 break;
             case R.id.txtCompare:
+                Toast.makeText(getApplicationContext(), "You need press  dates that you chose first, please!", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -232,8 +246,13 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uriCameraImage);
         // start the image capture Intent
         startActivityForResult(intent, IMAGE_CAMERA);
+    }
 
-
+    private void upload(){
+        Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        uriCameraImage = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
+//        i.putExtra(MediaStore.EXTRA_OUTPUT, uriCameraImage);
+        startActivityForResult(i, IMAGE_GALLERY);
     }
 
     public Uri getOutputMediaFileUri(int type) {
@@ -350,19 +369,15 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
                     e.printStackTrace();
                 }
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                SharePreference sharePreference = new SharePreference(getApplicationContext());
+                sharePreference.setImagetoPre(bitmap);
                 extraData = caldroidFragment.getExtraData();
                 extraData.put(BITAMP, bitmap);
                 caldroidFragment.refreshView();
-                //txtCompare.setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
-                Toast.makeText(getApplicationContext(), "2", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private void upload(){
-        Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(i, IMAGE_GALLERY);
-    }
 
     private void setupCalendar(){
         final Calendar calendar = Calendar.getInstance();
@@ -370,49 +385,6 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         String date = year + "/" + month + "/" + day;
-    }
-
-    public ArrayList<Image> getFilePaths() {
-        ArrayList<Image> filePaths = new ArrayList<Image>();
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), IMAGE_DIRECTORY_NAME);
-        // check for directory
-        if (file.isDirectory()) {
-            // getting list of file paths
-            File[] listFiles = file.listFiles();
-
-            // Check for count
-            if (listFiles.length > 0) {
-
-                // loop through all files
-                for (int i = 0; i < listFiles.length; i++) {
-                    // get file path
-                    String filePath = null;
-
-                    filePath = listFiles[i].getPath();
-                    //get format date
-                    Long date = listFiles[i].lastModified();
-                    dataDate = new Date(date);
-
-                    // check for supported file extension
-                    if (IsSupportedFile(filePath)) {
-                        // Add image path to array list
-                        filePaths.add(new Image(filePath, dataDate));
-                    }
-                }
-            } else {
-                // image directory is empty
-                Toast.makeText(CaldroidSampleActivity.this, AppConstant.IMAGE_DIRECTORY_NAME + " is empty. Please load some images in it !", Toast.LENGTH_LONG).show();
-            }
-
-        } else {
-            AlertDialog.Builder alert = new AlertDialog.Builder(CaldroidSampleActivity.this);
-            alert.setTitle("Error!");
-            alert.setMessage(AppConstant.IMAGE_DIRECTORY_NAME + " directory path is not valid! Please set the image directory name AppConstant.java class");
-            alert.setPositiveButton("OK", null);
-            alert.show();
-        }
-
-        return filePaths;
     }
 
     // Check supported file extensions
@@ -434,8 +406,13 @@ public class CaldroidSampleActivity extends AppCompatActivity implements View.On
         super.onSaveInstanceState(outState);
 
         if (caldroidFragment != null) {
-            caldroidFragment.saveStatesToKey(outState, "CALDROID_SAVED_STATE");
+            caldroidFragment.saveStatesToKey(outState, AppConstant.SAVE);
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }

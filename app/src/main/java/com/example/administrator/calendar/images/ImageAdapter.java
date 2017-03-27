@@ -1,8 +1,6 @@
 package com.example.administrator.calendar.images;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.view.PagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,12 +14,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.administrator.calendar.R;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Map;
 
 import static com.example.administrator.calendar.R.id.textView;
 
@@ -31,20 +25,16 @@ import static com.example.administrator.calendar.R.id.textView;
 
 public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
     private Context context;
-    Map<String, Object> extraData;
     ArrayList<Image> imageArrayList;
-    private int imageWidth;
     TextView txtTilte, txtTime, txtCancel;
     CheckBox checkBox;
     ImageView imageView;
     Image image;
-    Bitmap bitmap;
     final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
     ImageListener imageListener;
-    public ImageAdapter(Context context, ArrayList<Image> imageArrayList, int imageWidth, ImageListener imageListener){
+    public ImageAdapter(Context context, ArrayList<Image> imageArrayList, ImageListener imageListener){
         this.context = context;
         this.imageArrayList = imageArrayList;
-        this.imageWidth = imageWidth;
         this.imageListener = imageListener;
     }
     @Override
@@ -92,46 +82,6 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
         Glide.with(context).load(image.getUrl()).centerCrop().into(imageView);
         txtTime.setText(formatter.format(image.getDate()) + "");
 
-//        new AsyncTask<String, Void, Bitmap>(){
-//            @Override
-//            protected Bitmap doInBackground(String... params) {
-//                image = imageArrayList.get(position);
-//                ExifInterface exif = null;
-//                try {
-//                    exif = new ExifInterface(image.getUrl());
-//                    int orientation = exif.getAttributeInt(
-//                            ExifInterface.TAG_ORIENTATION,
-//                            ExifInterface.ORIENTATION_NORMAL);
-//
-//                    int angle = 0;
-//
-//                    if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
-//                        angle = 90;
-//                    } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
-//                        angle = 180;
-//                    } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
-//                        angle = 270;
-//                    }
-//
-//                    Matrix matrix = new Matrix();
-//                    matrix.postRotate(angle);
-//                    bitmap = decodeFile(image.getUrl(), imageWidth, imageWidth);
-//                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                return bitmap;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Bitmap bitmap) {
-//                super.onPostExecute(bitmap);
-//                linearLayout.setBackgroundDrawable(new BitmapDrawable(context.getResources(), bitmap));
-//                final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
-//                txtTime.setText("" + formatter.format(image.getDate()));
-//            }
-//        }.execute();
-
         container.addView(view);
         return view;
     }
@@ -139,30 +89,6 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.refreshDrawableState();
-    }
-
-    public static Bitmap decodeFile(String filePath, int WIDTH, int HIGHT) {
-        try {
-
-            File f = new File(filePath);
-
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
-
-            final int REQUIRED_WIDTH = WIDTH;
-            final int REQUIRED_HIGHT = HIGHT;
-            int scale = 1;
-            while (o.outWidth / scale / 2 >= REQUIRED_WIDTH && o.outHeight / scale / 2 >= REQUIRED_HIGHT)
-                scale *= 2;
-
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     @Override
@@ -182,9 +108,6 @@ public class ImageAdapter extends PagerAdapter implements View.OnClickListener{
         return imageArrayList;
     }
 
-    private void removeImage(int position){
-
-    }
      public interface ImageListener{
          void onCickCheckbox(int position);
          void onRemoveImage(int position);

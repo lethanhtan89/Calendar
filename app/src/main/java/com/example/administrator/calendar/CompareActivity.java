@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,9 +18,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.administrator.calendar.grid.CaldroidSampleActivity;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -118,7 +123,8 @@ public class CompareActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu_compare, menu);
+        return true;
     }
 
     @Override
@@ -126,6 +132,11 @@ public class CompareActivity extends AppCompatActivity {
         int id = item.getItemId();
         if(id == android.R.id.home) {
             intent();
+        }
+
+        if(id == R.id.action_save){
+            bitmap = mergeMultiple(bitmapArrayList);
+            saveBitmap(bitmap);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -140,5 +151,27 @@ public class CompareActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), CaldroidSampleActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void saveBitmap(Bitmap bm){
+        File file = Environment.getExternalStorageDirectory();
+        File newFile = new File(file, "test.jpg");
+
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(newFile);
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            Toast.makeText(CompareActivity.this, "Save Bitmap: " + fileOutputStream.toString(),
+                    Toast.LENGTH_LONG).show();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(CompareActivity.this, "Something wrong: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(CompareActivity.this, "Something wrong: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 }

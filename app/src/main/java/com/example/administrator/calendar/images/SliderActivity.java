@@ -54,15 +54,11 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
 
     private void init(){
         utils = new Utils(this);
-//        Date date = (Date) getIntent().getExtras().get(AppConstant.DATE);
-
-       // imageArrayList = utils.getFilePaths(date);
         imageArrayList = (ArrayList<Image>) getIntent().getExtras().get(AppConstant.DATE);
-//        imageArrayList = new ArrayList<>();
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
         addBottomDots(0);
-        adapter = new ImageAdapter(this, imageArrayList, 1024, this);
+        adapter = new ImageAdapter(this, imageArrayList, this);
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(this);
     }
@@ -94,12 +90,6 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
             dots[currentPage].setTextColor(getResources().getColor(R.color.colorPrimaryDark));
     }
 
-
-
-    private int getItem(int i) {
-        return viewPager.getCurrentItem() + i;
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_slider, menu);
@@ -127,8 +117,6 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
                         intent.putExtra(AppConstant.CHECKBOX, images);
                         startActivity(intent);
                         finish();
-                    }else {
-                        Toast.makeText(getApplicationContext(), "Choose image, please", Toast.LENGTH_SHORT).show();
                     }
                 }
                 break;
@@ -187,5 +175,13 @@ public class SliderActivity extends AppCompatActivity implements View.OnClickLis
         }
         Intent intent = new Intent(getApplicationContext(), CaldroidSampleActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), CaldroidSampleActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

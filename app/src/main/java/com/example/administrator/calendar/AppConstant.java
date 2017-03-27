@@ -20,6 +20,7 @@ public class AppConstant {
     public static final String DATE = "date";
     public static final String CHECKBOX = "checkbox";
     public static final String PRE = "sharepreference";
+    public static final String SAVE = "CALDROID_SAVED_STATE";
 
     // supported file formats
     public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg", "png");

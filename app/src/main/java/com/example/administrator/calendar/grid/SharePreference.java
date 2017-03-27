@@ -9,6 +9,9 @@ import android.util.Base64;
 import com.example.administrator.calendar.AppConstant;
 
 import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by Administrator on 3/21/2017.
@@ -33,6 +36,20 @@ public class SharePreference {
         return StringToBitMap(url);
     }
 
+    public boolean setDatetoPre(Date date){
+        SharedPreferences preferences = context.getSharedPreferences(null, context.MODE_WORLD_WRITEABLE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(AppConstant.DATE, String.valueOf(date));
+        editor.commit();
+        return true;
+    }
+
+    public String getDatefromPre(){
+        SharedPreferences preferences = context.getSharedPreferences(null, context.MODE_WORLD_READABLE);
+        String date1 = preferences.getString(AppConstant.DATE, "can not get");
+        return String.valueOf(StringtoDate(date1));
+    }
+
     public String BitMapToString(Bitmap bitmap){
         ByteArrayOutputStream baos=new  ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG,100, baos);
@@ -50,5 +67,25 @@ public class SharePreference {
             e.getMessage();
             return null;
         }
+    }
+
+    public String DatetoString(Date date){
+        SimpleDateFormat dateformat = new SimpleDateFormat("dd MM yyyy");
+        String datetime = dateformat.format(date);
+        return datetime;
+    }
+
+    public Date StringtoDate(String dateString){
+        SimpleDateFormat format = new SimpleDateFormat("dd MM yyyy");
+        Date date = null;
+        try {
+            date = format.parse(dateString);
+            System.out.println(date);
+
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return date;
     }
 }

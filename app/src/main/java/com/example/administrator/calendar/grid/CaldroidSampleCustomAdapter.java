@@ -17,7 +17,6 @@ import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidGridAdapter;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 import hirondelle.date4j.DateTime;
@@ -27,7 +26,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 	public static final String BITAMP = "bitmap";
 	SharePreference sharePreference;
 	SimpleDateFormat dateFormat;
-	Date date;
+
 	public CaldroidSampleCustomAdapter(Context context, int month, int year, Map<String, Object> caldroidData, Map<String, Object> extraData) {
 		super(context, month, year, caldroidData, extraData);
 		dateFormat = new SimpleDateFormat("dd MMM yyyy");
@@ -60,8 +59,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
 		// Set color of the dates in previous / next month
 		if (dateTime.getMonth() != month) {
-			tv1.setTextColor(resources
-					.getColor(com.caldroid.R.color.caldroid_darker_gray));
+			tv1.setTextColor(resources.getColor(com.caldroid.R.color.caldroid_darker_gray));
 		}
 
 		boolean shouldResetDiabledView = false;
@@ -72,16 +70,16 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 				|| (maxDateTime != null && dateTime.gt(maxDateTime))
 				|| (disableDates != null && disableDates.indexOf(dateTime) != -1)) {
 
-			tv1.setTextColor(CaldroidFragment.disabledTextColor);
+			//tv1.setTextColor(CaldroidFragment.disabledTextColor);
 
 			if (CaldroidFragment.disabledBackgroundDrawable == -1) {
-				cellView.setBackgroundResource(R.drawable.ic_check);
+				cellView.setBackgroundResource(R.drawable.ic_cancel);
 			} else {
 				cellView.setBackgroundResource(CaldroidFragment.disabledBackgroundDrawable);
 			}
 
 			if (dateTime.equals(getToday())) {
-				cellView.setBackgroundResource(R.drawable.ic_check_select);
+				//cellView.setBackgroundResource(R.drawable.ic_check_select);
 			}
 
 		} else {
@@ -90,12 +88,9 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
 		// Customize for selected dates
 		if (selectedDates != null && selectedDates.indexOf(dateTime) != -1) {
-//			cellView.setBackgroundColor(resources.getColor(R.color.bg_screen1));
-//
-//			tv1.setTextColor(Color.BLACK);
-			cellView.setBackgroundResource(R.color.bg_screen4);
-			Bitmap bitmap = (Bitmap) getExtraData().get(BITAMP);
-			tv2.setImageBitmap(sharePreference.getImagefromPre(bitmap));
+//			cellView.setBackgroundResource(R.color.bg_screen4);
+//			Bitmap bitmap = (Bitmap) getExtraData().get(BITAMP);
+//			tv2.setImageBitmap(sharePreference.getImagefromPre(bitmap));
 
 		} else {
 			shouldResetSelectedView = true;
@@ -106,6 +101,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 			if (dateTime.equals(getToday())) {
 				cellView.setBackgroundResource(R.color.bg_screen4);
 				Bitmap bitmap = (Bitmap) getExtraData().get(BITAMP);
+				tv1.setText(sharePreference.getDatefromPre());
 				tv2.setImageBitmap(sharePreference.getImagefromPre(bitmap));
 			} else {
 				cellView.setBackgroundResource(com.caldroid.R.drawable.cell_bg);
@@ -124,5 +120,11 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
 		return cellView;
 	}
+
+//	public void setCheckBox(int position){
+//		DateTime datetime = (DateTime) extraData.get(position);
+//		datetime.
+//		notifyDataSetChanged();
+//	}
 
 }
